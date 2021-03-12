@@ -57,7 +57,7 @@ public class Client {
         String message;
         boolean sentRecipient = false;
         
-        while (!(line = br.readLine()).startsWith("250 ok Message")) {
+        while (!(line = br.readLine()).startsWith("221")) {
             System.out.println("\r\nServer: " + line);
             
             if (line.startsWith("220")) {
@@ -75,8 +75,12 @@ public class Client {
                 sendMessage("DATA");
             } else if (line.startsWith("354")) {
                 sendData();
+            } else if (line.startsWith("250 ok Message")) {
+                sendMessage("QUIT");
             }
         }
+        
+        System.out.println("\r\nServer: " + line);
     }
     
     private void cleanUp() throws Exception {
