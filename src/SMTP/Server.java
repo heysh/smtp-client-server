@@ -1,13 +1,19 @@
 package SMTP;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server {
     private ServerSocket server;
+    private PrintWriter output;
+    private InputStreamReader input;
+    private BufferedReader br;
+    private Socket client;
     
     public Server(String ipAddress, int port) throws Exception {
         if (ipAddress != null && !ipAddress.isEmpty()) {
@@ -17,19 +23,87 @@ public class Server {
         }
     }
     
-    private void listen() throws Exception {
-        // listen to incoming client's requests via the ServerSocket
-        String data = null;
-        Socket client = this.server.accept();
-        String clientAddress = client.getInetAddress().getHostAddress();
-        System.out.println("\r\nNew client connection from " + clientAddress);
+    private void waitForConnection() throws Exception {
+        System.out.println("\r\nWaiting for a connection");
+        client = server.accept();
+        System.out.println("\r\nConnected to " + client.getInetAddress().getHostName());
+    }
+    
+    private void setupStreams() throws Exception {
+        output = new PrintWriter(client.getOutputStream(), true);
+        input = new InputStreamReader(client.getInputStream());
+        br = new BufferedReader(input);
+        System.out.println("\r\nStreams are setup");
+    }
+    
+    private void sendMessage(String message) throws Exception {
+        output.println(message);
+    }
+    
+    private void initiateCommunication() throws Exception {
+        sendMessage("220 " + server.getInetAddress().getHostName());
+    }
+    
+    private void farewell() throws Exception {
+        sendMessage("221 " + server.getInetAddress().getHostName() + " closing connection");
+    }
+    
+    private void handleData() throws Exception {
+        String message = "";
+        String line;
         
-        // print received datagrams from client
-        BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        while ((data = in.readLine()) != null) {
-            System.out.println("\r\nMessage from " + clientAddress + ": " + data);
-            client.sendUrgentData(1);
+        while (!(line = br.readLine()).equals(".")) {
+            System.out.println("\r\nClient: " + line);
+            message = message + line;
         }
+    }
+    
+    private void exchangeMessages() throws Exception {
+        String line;
+        String[] lineSplitted;
+        
+        while (!(line = br.readLine()).equals("QUIT")) {
+            System.out.println("\rClient: " + line);
+            lineSplitted = line.split(" ");
+            
+            if (lineSplitted[0].equals("HELLO") && lineSplitted.length == 2) {
+                sendMessage("250 Hello " + lineSplitted[1] + ", pleased to meet you");
+            } else if (line.startsWith("MAIL FROM:")) {
+                // handle email: lineSplitted[2].substring(1, lineSplitted[2].length() - 1)
+                sendMessage("250 ok");
+            } else if (line.startsWith("RCPT TO: ")) {
+                // handle email: lineSplitted[2].substring(1, lineSplitted[2].length() - 1)
+                sendMessage("250 ok");
+            } else if (line.equals("DATA")) {
+                sendMessage("354 End data with <CR><LF>.<CR><LF>");
+                handleData();
+                sendMessage("250 ok Message accepted for delivery");
+            }
+        }
+    }
+    
+    private void cleanUp() throws Exception {
+        System.out.println("\r\nClosing connection");
+        output.close();
+        input.close();
+        client.close();
+    }
+    
+    private void listen() throws Exception {
+        
+//        while (true) {
+            try {
+                waitForConnection();
+                setupStreams();
+                initiateCommunication();
+                exchangeMessages();
+                farewell();
+            } catch (EOFException e) {
+                System.out.println("\r\nServer closed the connection");
+            } finally {
+                cleanUp();
+            }
+//        }
     }
     
     public InetAddress getSocketAddress() {
@@ -55,6 +129,7 @@ public class Server {
         System.out.println("\r\nRunning server: " +
                 "Host=" + server.getSocketAddress().getHostAddress() +
                 " Port=" + server.getPort());
+        
         server.listen();
     }
 }
