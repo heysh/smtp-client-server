@@ -1,7 +1,11 @@
 package SMTP;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.EOFException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -48,35 +52,48 @@ public class Server {
         sendMessage("221 " + server.getInetAddress().getHostName() + " closing connection");
     }
     
-    private void handleData() throws Exception {
+    private String handleData() throws Exception {
         String message = "";
         String line;
         
         while (!(line = br.readLine()).equals(".")) {
-            System.out.println("\r\nClient: " + line);
-            message = message + line;
+            message = message + line + "\n";
+        }
+        
+        return message;
+    }
+    
+    private void saveEmail(String receiver, String email) {
+        try {
+            FileWriter fw = new FileWriter(receiver + ".txt");
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(email);
+            bw.close();
+        } catch (IOException e) {
+            System.out.println("\r\nCould not save the email");
         }
     }
     
     private void exchangeMessages() throws Exception {
-        String line;
+        String line, sender = "", receiver = "", email = "";
         String[] lineSplitted;
         
         while (!(line = br.readLine()).equals("QUIT")) {
-            System.out.println("\rClient: " + line);
+            System.out.println("\r\nClient: " + line);
             lineSplitted = line.split(" ");
             
             if (lineSplitted[0].equals("HELLO") && lineSplitted.length == 2) {
                 sendMessage("250 Hello " + lineSplitted[1] + ", pleased to meet you");
             } else if (line.startsWith("MAIL FROM:")) {
-                // handle email: lineSplitted[2].substring(1, lineSplitted[2].length() - 1)
+                sender = lineSplitted[2].substring(1, lineSplitted[2].length() - 1);
                 sendMessage("250 ok");
             } else if (line.startsWith("RCPT TO: ")) {
-                // handle email: lineSplitted[2].substring(1, lineSplitted[2].length() - 1)
+                receiver = lineSplitted[2].substring(1, lineSplitted[2].length() - 1);
                 sendMessage("250 ok");
             } else if (line.equals("DATA")) {
                 sendMessage("354 End data with <CR><LF>.<CR><LF>");
-                handleData();
+                email = handleData();
+                saveEmail(receiver, email);
                 sendMessage("250 ok Message accepted for delivery");
             }
         }
@@ -90,20 +107,17 @@ public class Server {
     }
     
     private void listen() throws Exception {
-        
-//        while (true) {
-            try {
-                waitForConnection();
-                setupStreams();
-                initiateCommunication();
-                exchangeMessages();
-                farewell();
-            } catch (EOFException e) {
-                System.out.println("\r\nServer closed the connection");
-            } finally {
-                cleanUp();
-            }
-//        }
+        try {
+            waitForConnection();
+            setupStreams();
+            initiateCommunication();
+            exchangeMessages();
+            farewell();
+        } catch (EOFException e) {
+            System.out.println("\r\nServer closed the connection");
+        } finally {
+            cleanUp();
+        }
     }
     
     public InetAddress getSocketAddress() {
