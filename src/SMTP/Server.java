@@ -87,7 +87,7 @@ public class Server {
      * @return The email that has been transmitted from the client.
      * @throws Exception
      */
-    private String handleData() throws Exception {
+    private String handleEmail() throws Exception {
         String email = "";
         String line;
         
@@ -101,17 +101,18 @@ public class Server {
     
     /**
      * Save the email that has been transmitted by the client to a file, named after the intended recipient of the email.
-     * @param receiver The recipient of the email.
+     * @param sender The sender of the email.
+     * @param recipient The recipient of the email.
      * @param email The email that has been transmitted by the client.
      */
-    private void saveEmail(String receiver, String email) {
+    private void saveEmail(String sender, String recipient, String email) {
         try {
             // create a FileWriter object, and create a BufferedWriter object from it
-            FileWriter fw = new FileWriter(receiver + ".txt");
+            FileWriter fw = new FileWriter(recipient + ".txt");
             BufferedWriter bw = new BufferedWriter(fw);
             
             // write the email to the file and close the BufferedWriter
-            bw.write(email);
+            bw.write(sender + "\n" + email);
             bw.close();
         } catch (IOException e) {
             // if there was a problem writing to the file
@@ -124,7 +125,7 @@ public class Server {
      * @throws Exception
      */
     private void exchangeMessages() throws Exception {
-        String line, sender = "", receiver = "", email = "";
+        String line, sender = "", recipient = "", email = "";
         String[] lineSplitted;
         
         // until the message that is received is "QUIT", keep reading messages from the client
@@ -147,16 +148,16 @@ public class Server {
             
             // if the line starts with "RCPT TO:"
             if (line.startsWith("RCPT TO: ")) {
-                // save the receiver's email address and respond with an OK message
-                receiver = lineSplitted[2].substring(1, lineSplitted[2].length() - 1);
+                // save the recipient's email address and respond with an OK message
+                recipient = lineSplitted[2].substring(1, lineSplitted[2].length() - 1);
                 sendMessage("250 ok");
             }
             
             // if the message is "DATA"
             if (line.equals("DATA")) {
                 sendMessage("354 End data with <CR><LF>.<CR><LF>");
-                email = handleData(); // handle the email
-                saveEmail(receiver, email); // save the email to a file
+                email = handleEmail(); // handle the email
+                saveEmail(sender, recipient, email); // save the email to a file
                 sendMessage("250 ok Message accepted for delivery");
             }
         }
