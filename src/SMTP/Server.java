@@ -75,14 +75,6 @@ public class Server {
     }
     
     /**
-     * Transmit the final message to the client.
-     * @throws Exception
-     */
-    private void farewell() throws Exception {
-        sendMessage("221 " + server.getInetAddress().getHostName() + " closing connection");
-    }
-    
-    /**
      * Read each line of the email that is being transmitted from the client.
      * @return The email that has been transmitted from the client.
      * @throws Exception
@@ -161,6 +153,14 @@ public class Server {
                 sendMessage("250 ok Message accepted for delivery");
             }
         }
+    }
+    
+    /**
+     * Transmit the final message to the client.
+     * @throws Exception
+     */
+    private void farewell() throws Exception {
+        sendMessage("221 " + server.getInetAddress().getHostName() + " closing connection");
     }
     
     /**
