@@ -61,7 +61,7 @@ public class Client {
      * Capture each line of the email and transmit them to the server.
      * @throws Exception
      */
-    private void sendData() throws Exception {
+    private void sendEmail() throws Exception {
         String line;
         
         // until the client types a ".", send each line to the server
@@ -80,6 +80,7 @@ public class Client {
         String line;
         String message;
         boolean sentRecipient = false;
+        boolean sentData = false;
         
         // until the message that is received starts with "221", keep reading messages from the server
         while (!(line = br.readLine()).startsWith("221")) {
@@ -107,14 +108,16 @@ public class Client {
                 sentRecipient = true; // user has sent the recipient now
             }
             
-            // if the message is "250 ok" and the user has entered the recipient of the email, respond with "DATA"
-            if (line.equals("250 ok") && sentRecipient) {
+            // if the message is "250 ok", and the user has entered the recipient of the email,
+            // and "DATA" has not been sent yet, respond with "DATA"
+            if (line.equals("250 ok") && sentRecipient && !sentData) {
                 sendMessage("DATA");
+                sentData = true;
             }
             
             // if the line starts with "354", the user can now type the email they wish to send
             if (line.startsWith("354")) {
-                sendData();
+                sendEmail();
             }
             
             // if the line starts with "250 ok Message", respond with "QUIT"
