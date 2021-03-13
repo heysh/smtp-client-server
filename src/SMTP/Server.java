@@ -168,7 +168,7 @@ public class Server {
      * @throws Exception
      */
     private void cleanUp() throws Exception {
-        System.out.println("\r\nClosing connection");
+        System.out.println("\r\nClosing connection to " + client.getInetAddress().getHostName());
         output.close();
         input.close();
         br.close();
