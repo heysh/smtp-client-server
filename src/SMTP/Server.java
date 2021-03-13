@@ -180,16 +180,18 @@ public class Server {
      * @throws Exception
      */
     private void listen() throws Exception {
-        try {
-            waitForConnection();
-            setupStreams();
-            initiateCommunication();
-            exchangeMessages();
-            farewell();
-        } catch (EOFException e) {
-            System.out.println("\r\nServer closed the connection");
-        } finally {
-            cleanUp();
+        while (true) {
+            try {
+                waitForConnection();
+                setupStreams();
+                initiateCommunication();
+                exchangeMessages();
+                farewell();
+            } catch (EOFException e) {
+                System.out.println("\r\nServer closed the connection");
+            } finally {
+                cleanUp();
+            }
         }
     }
     
