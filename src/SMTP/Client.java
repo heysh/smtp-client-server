@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 /**
@@ -21,6 +23,7 @@ public class Client {
     private InetAddress serverAddress;
     private int serverPort;
     private Scanner scanner;
+    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     
     /**
      * Create an object of type Client that creates a stream socket, and connects it to the specified port on the server's IP address.
@@ -38,6 +41,15 @@ public class Client {
     }
     
     /**
+     * Print a message to the console prefaced with a timestamp. 
+     * @param message The message that is to be printed.
+     */
+    private void print(String message) {
+        LocalDateTime now = LocalDateTime.now();
+        System.out.println("\r\n[" + dtf.format(now) + "] " + message);
+    }
+    
+    /**
      * Setup the input buffer, and the input and output streams that will be used to send and receive messages, to and from the server.
      * @throws Exception
      */
@@ -45,7 +57,7 @@ public class Client {
         output = new PrintWriter(socket.getOutputStream(), true);
         input = new InputStreamReader(socket.getInputStream());
         br = new BufferedReader(input);
-        System.out.println("\r\nStreams are setup");
+        print("Streams are setup");
     }
     
     /**
@@ -84,7 +96,7 @@ public class Client {
         
         // until the message that is received starts with "221", keep reading messages from the server
         while (!(line = br.readLine()).startsWith("221")) {
-            System.out.println("\r\nServer: " + line);
+            print("Server: " + line);
             
             // if the line starts with "220", respond with a greeting
             if (line.startsWith("220")) {
@@ -94,7 +106,7 @@ public class Client {
             // if the line starts with "250 Hello"
             if (line.startsWith("250 Hello")) {
                 // prompt the user to enter the sender of the email and transmit it to the server
-                System.out.print("\r\nMAIL FROM: ");
+                print("MAIL FROM: ");
                 message = scanner.nextLine();
                 sendMessage("MAIL FROM: <" + message + ">");
             }
@@ -102,7 +114,7 @@ public class Client {
             // if the message is "250 ok" and the user hasn't entered the recipient of the email
             if (line.equals("250 ok") && !sentRecipient) {
                 // prompt the user to enter the recipient and transmit it to the server
-                System.out.print("\r\nRCPT TO: ");
+                print("RCPT TO: ");
                 message = scanner.nextLine();
                 sendMessage("RCPT TO: <" + message + ">");
                 sentRecipient = true; // user has sent the recipient now
@@ -127,7 +139,7 @@ public class Client {
         }
         
         // print the final message received from the server
-        System.out.println("\r\nServer: " + line);
+        print("Server: " + line);
     }
     
     /**
@@ -135,7 +147,7 @@ public class Client {
      * @throws Exception
      */
     private void cleanUp() throws Exception {
-        System.out.println("\r\nClosing connection");
+        print("Closing connection");
         output.close();
         input.close();
         br.close();
@@ -151,7 +163,7 @@ public class Client {
             setupStreams();
             exchangeMessages();
         } catch (EOFException e) {
-            System.out.println("\r\nClient closed the connection");
+            print("Client closed the connection");
         } finally {
             cleanUp();
         }
@@ -175,7 +187,7 @@ public class Client {
         
         // create an object of type Client
         Client client = new Client(serverIP, port);
-        System.out.println("\r\nConnected to server: " + client.socket.getInetAddress());
+        client.print("Connected to server: " + client.socket.getInetAddress());
                 
         client.start();
     }
