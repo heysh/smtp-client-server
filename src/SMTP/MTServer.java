@@ -23,12 +23,16 @@ public class MTServer {
         }
     }
     
+    private void waitForConnection() throws Exception {
+        System.out.println("\r\nWaiting for a connection");
+        client = server.accept();
+        System.out.println("\r\nConnected to " + client.getInetAddress().getHostName());
+    }
+    
     private void listen() throws Exception {
         while (true) {
             try {
-                System.out.println("\r\nWaiting for a connection");
-                client = server.accept();
-                System.out.println("\r\nConnected to " + client.getInetAddress().getHostName());
+                waitForConnection();
                 ClientHandler clientSocket = new ClientHandler(client);
                 new Thread(clientSocket).start();
             } catch (EOFException e) {
