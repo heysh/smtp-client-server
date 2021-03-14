@@ -13,11 +13,22 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Class that acts as an SMTP server; allowing clients to connect and send emails.
+ * @author Harshil Surendralal bf000259
+ *
+ */
 public class Server {
     private static ServerSocket server = null;
     private Socket client = null;
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     
+    /**
+     * Create an object of type Server that creates a server socket at an IP address, with a given port.
+     * @param ipAddress The IP address the server will be bound to.
+     * @param port The port on which the server socket is bound.
+     * @throws Exception
+     */
     public Server(String ipAddress, int port) throws Exception {
         if (ipAddress != null && !ipAddress.isEmpty()) {
             server = new ServerSocket(port, 1, InetAddress.getByName(ipAddress));
@@ -26,11 +37,19 @@ public class Server {
         }
     }
     
+    /**
+     * Print a message to the console prefaced with a timestamp. 
+     * @param message The message that is to be printed.
+     */
     private static void print(String message) {
         LocalDateTime now = LocalDateTime.now();
         System.out.println("\r\n[" + dtf.format(now) + "] " + message);
     }
     
+    /**
+     * Wait until a client wishes to connect to the server, and accept the connection.
+     * @throws Exception
+     */
     private void waitForConnection() throws Exception {
         print("Waiting for a connection");
         client = server.accept();
@@ -38,6 +57,10 @@ public class Server {
                 client.getInetAddress().getHostName());
     }
     
+    /**
+     * Primary method used to accept and handle clients.
+     * @throws Exception
+     */
     private void listen() throws Exception {
         while (true) {
             try {
@@ -50,14 +73,27 @@ public class Server {
         }
     }
     
+    /**
+     * Get the IP address the server is be bound to.
+     * @return The IP address.
+     */
     private InetAddress getSocketAddress() {
         return server.getInetAddress();
     }
     
+    /**
+     * Get the port on which the server socket is bound.
+     * @return The port.
+     */
     private int getPort() {
         return server.getLocalPort();
     }
     
+    /**
+     * Main entry point to the program.
+     * @param args The command line arguments passed to the program.
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
      // set the server IP and port number
         String serverIP = "192.168.56.1";
@@ -78,6 +114,11 @@ public class Server {
         server.listen();
     }
     
+    /**
+     * Class that handles the requests of each client.
+     * @author Harshil Surendralal bf000259
+     *
+     */
     private static class ClientHandler implements Runnable {
         private PrintWriter output;
         private InputStreamReader input;
@@ -85,12 +126,20 @@ public class Server {
         private Socket client;
         private String clientName;
         
+        /**
+         * Create an object of type ClientHandler that holds the client's socket.
+         * @param socket The socket of the client.
+         */
         public ClientHandler(Socket socket) {
             this.client = socket;
             this.clientName = client.getInetAddress().getHostAddress() + "/" + 
                     client.getInetAddress().getHostName();
         }
         
+        /**
+         * Setup the input buffer, and the input and output streams that will be used to send and receive messages, to and from the client.
+         * @throws Exception
+         */
         private void setupStreams() throws Exception {
             output = new PrintWriter(client.getOutputStream(), true);
             input = new InputStreamReader(client.getInputStream());
@@ -98,10 +147,28 @@ public class Server {
             print("Streams are setup");
         }
         
+        /**
+         * Transmit a message to the client using their output stream.
+         * @param message The message that will be transmitted.
+         * @throws Exception
+         */
         private void sendMessage(String message) throws Exception {
             output.println(message);
         }
         
+        /**
+         * Transmit the initial message to the client. 
+         * @throws Exception
+         */
+        private void initiateCommunication() throws Exception {
+            sendMessage("220 " + server.getInetAddress().getHostName());
+        }
+        
+        /**
+         * Read each line of the email that is being transmitted from the client.
+         * @return The email that has been transmitted from the client.
+         * @throws Exception
+         */
         private String handleEmail() throws Exception {
             String email = "";
             String line;
@@ -114,6 +181,12 @@ public class Server {
             return email;
         }
         
+        /**
+         * Save the email that has been transmitted by the client to a file, named after the intended recipient of the email.
+         * @param sender The sender of the email.
+         * @param recipient The recipient of the email.
+         * @param email The email that has been transmitted by the client.
+         */
         private void saveEmail(String sender, String recipient, String email) {
             try {
                 // create a FileWriter object, and create a BufferedWriter object from it
@@ -129,6 +202,10 @@ public class Server {
             }
         }
         
+        /**
+         * Primary method used to transmit and receive messages to and from the client.
+         * @throws Exception
+         */
         private void exchangeMessages() throws Exception {
             String line, sender = "", recipient = "", email = "";
             String[] lineSplitted;
@@ -168,14 +245,18 @@ public class Server {
             }
         }
         
-        private void initiateCommunication() throws Exception {
-            sendMessage("220 " + server.getInetAddress().getHostName());
-        }
-        
+        /**
+         * Transmit the final message to the client.
+         * @throws Exception
+         */
         private void farewell() throws Exception {
             sendMessage("221 " + server.getInetAddress().getHostName() + " closing connection");
         }
         
+        /**
+         * Close the socket, input buffer, and the input and output streams that were used to send and receive messages, to and from the client.
+         * @throws Exception
+         */
         private void cleanUp() throws Exception {
             print("Closing connection to " + clientName);
             output.close();
@@ -184,6 +265,9 @@ public class Server {
             client.close();
         }
         
+        /**
+         * Primary method used to setup communication and close connections to clients.
+         */
         @Override
         public void run() {
             try {
