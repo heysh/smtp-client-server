@@ -19,8 +19,8 @@ import java.time.format.DateTimeFormatter;
  *
  */
 public class Server {
-    private static ServerSocket server = null;
-    private Socket client = null;
+    private static ServerSocket server;
+    private Socket client;
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     
     /**
