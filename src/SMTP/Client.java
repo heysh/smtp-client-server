@@ -44,9 +44,18 @@ public class Client {
      * Print a message to the console prefaced with a timestamp. 
      * @param message The message that is to be printed.
      */
-    private void print(String message) {
+    private void println(String message) {
         LocalDateTime now = LocalDateTime.now();
         System.out.println("\r\n[" + dtf.format(now) + "] " + message);
+    }
+    
+    /**
+     * Print a message to the console prefaced with a timestamp. 
+     * @param message The message that is to be printed.
+     */
+    private void print(String message) {
+        LocalDateTime now = LocalDateTime.now();
+        System.out.print("\r\n[" + dtf.format(now) + "] " + message);
     }
     
     /**
@@ -57,7 +66,7 @@ public class Client {
         output = new PrintWriter(socket.getOutputStream(), true);
         input = new InputStreamReader(socket.getInputStream());
         br = new BufferedReader(input);
-        print("Streams are setup");
+        println("Streams are setup");
     }
     
     /**
@@ -96,7 +105,7 @@ public class Client {
         
         // until the message that is received starts with "221", keep reading messages from the server
         while (!(line = br.readLine()).startsWith("221")) {
-            print("Server: " + line);
+            println("Server: " + line);
             
             // if the line starts with "220", respond with a greeting
             if (line.startsWith("220")) {
@@ -139,7 +148,7 @@ public class Client {
         }
         
         // print the final message received from the server
-        print("Server: " + line);
+        println("Server: " + line);
     }
     
     /**
@@ -147,7 +156,7 @@ public class Client {
      * @throws Exception
      */
     private void cleanUp() throws Exception {
-        print("Closing connection");
+        println("Closing connection");
         output.close();
         input.close();
         br.close();
@@ -163,7 +172,7 @@ public class Client {
             setupStreams();
             exchangeMessages();
         } catch (EOFException e) {
-            print("Client closed the connection");
+            println("Client closed the connection");
         } finally {
             cleanUp();
         }
@@ -187,7 +196,7 @@ public class Client {
         
         // create an object of type Client
         Client client = new Client(serverIP, port);
-        client.print("Connected to server: " + client.socket.getInetAddress());
+        client.println("Connected to server: " + client.socket.getInetAddress());
                 
         client.start();
     }
