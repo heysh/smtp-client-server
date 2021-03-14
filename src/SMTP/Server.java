@@ -13,13 +13,13 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class MTServer {
+public class Server {
     private static ServerSocket server = null;
     private Socket client = null;
     private static String clientName;
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     
-    public MTServer(String ipAddress, int port) throws Exception {
+    public Server(String ipAddress, int port) throws Exception {
         if (ipAddress != null && !ipAddress.isEmpty()) {
             server = new ServerSocket(port, 1, InetAddress.getByName(ipAddress));
         } else {
@@ -72,7 +72,7 @@ public class MTServer {
         }
         
         // create an object of type Server
-        MTServer server = new MTServer(serverIP, port);
+        Server server = new Server(serverIP, port);
         print("Running server: " +
                 "Host=" + server.getSocketAddress().getHostAddress() +
                 " Port=" + server.getPort());

@@ -15,7 +15,7 @@ import java.net.Socket;
  * Class that acts as an SMTP server; allowing clients to connect and send emails.
  * @author Harshil Surendralal bf000259
  */
-public class Server {
+public class STServer {
     private ServerSocket server;
     private PrintWriter output;
     private InputStreamReader input;
@@ -28,7 +28,7 @@ public class Server {
      * @param port The port on which the server socket is bound.
      * @throws Exception
      */
-    public Server(String ipAddress, int port) throws Exception {
+    public STServer(String ipAddress, int port) throws Exception {
         if (ipAddress != null && !ipAddress.isEmpty()) {
             this.server = new ServerSocket(port, 1, InetAddress.getByName(ipAddress));
         } else {
@@ -228,7 +228,7 @@ public class Server {
         }
         
         // create an object of type Server
-        Server server = new Server(serverIP, port);
+        STServer server = new STServer(serverIP, port);
         System.out.println("\r\nRunning server: " +
                 "Host=" + server.getSocketAddress().getHostAddress() +
                 " Port=" + server.getPort());
