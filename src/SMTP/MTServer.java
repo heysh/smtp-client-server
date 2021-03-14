@@ -10,10 +10,14 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class MTServer {
-    private static ServerSocket server;
-    private Socket client;
+    private static ServerSocket server = null;
+    private Socket client = null;
+    private static String clientName;
+    private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     
     public MTServer(String ipAddress, int port) throws Exception {
         if (ipAddress != null && !ipAddress.isEmpty()) {
@@ -23,10 +27,17 @@ public class MTServer {
         }
     }
     
+    private static void print(String message) {
+        LocalDateTime now = LocalDateTime.now();
+        System.out.println("\r\n[" + dtf.format(now) + "] " + message);
+    }
+    
     private void waitForConnection() throws Exception {
-        System.out.println("\r\nWaiting for a connection");
+        print("Waiting for a connection");
         client = server.accept();
-        System.out.println("\r\nConnected to " + client.getInetAddress().getHostName());
+        clientName = client.getInetAddress().getHostAddress() + "/" +
+                client.getInetAddress().getHostName();
+        print("Connected to " + clientName);
     }
     
     private void listen() throws Exception {
@@ -36,10 +47,8 @@ public class MTServer {
                 ClientHandler clientSocket = new ClientHandler(client);
                 new Thread(clientSocket).start();
             } catch (EOFException e) {
-                System.out.println("\r\nServer closed the connection");
-            } finally {
-                server.close();
-            }            
+                print("Server closed the connection");
+            }           
         }
     }
     
@@ -64,7 +73,7 @@ public class MTServer {
         
         // create an object of type Server
         MTServer server = new MTServer(serverIP, port);
-        System.out.println("\r\nRunning server: " +
+        print("Running server: " +
                 "Host=" + server.getSocketAddress().getHostAddress() +
                 " Port=" + server.getPort());
         
@@ -85,7 +94,7 @@ public class MTServer {
             output = new PrintWriter(client.getOutputStream(), true);
             input = new InputStreamReader(client.getInputStream());
             br = new BufferedReader(input);
-            System.out.println("\r\nStreams are setup");
+            print("Streams are setup");
         }
         
         private void sendMessage(String message) throws Exception {
@@ -115,7 +124,7 @@ public class MTServer {
                 bw.close();
             } catch (IOException e) {
                 // if there was a problem writing to the file
-                System.out.println("\r\nCould not save the email");
+                print("Could not save the email");
             }
         }
         
@@ -125,7 +134,7 @@ public class MTServer {
             
             // until the message that is received is "QUIT", keep reading messages from the client
             while (!(line = br.readLine()).equals("QUIT")) {
-                System.out.println("\r\nClient: " + line);
+                print(clientName + ": " + line);
                 lineSplitted = line.split(" "); // split the line by spaces so the message can be identified easily
                 
                 // if the first word is "HELLO"
@@ -167,7 +176,7 @@ public class MTServer {
         }
         
         private void cleanUp() throws Exception {
-            System.out.println("\r\nClosing connection");
+            print("Closing connection to " + clientName);
             output.close();
             input.close();
             br.close();
@@ -182,7 +191,7 @@ public class MTServer {
                 exchangeMessages();
                 farewell();
             } catch (EOFException e) {
-                System.out.println("\r\nServer closed the connection");
+                print("Server closed the connection");
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
