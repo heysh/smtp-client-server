@@ -16,7 +16,6 @@ import java.time.format.DateTimeFormatter;
 public class Server {
     private static ServerSocket server = null;
     private Socket client = null;
-    private static String clientName;
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     
     public Server(String ipAddress, int port) throws Exception {
@@ -35,9 +34,8 @@ public class Server {
     private void waitForConnection() throws Exception {
         print("Waiting for a connection");
         client = server.accept();
-        clientName = client.getInetAddress().getHostAddress() + "/" +
-                client.getInetAddress().getHostName();
-        print("Connected to " + clientName);
+        print("Connected to " + client.getInetAddress().getHostAddress() + "/" +
+                client.getInetAddress().getHostName());
     }
     
     private void listen() throws Exception {
@@ -85,9 +83,12 @@ public class Server {
         private InputStreamReader input;
         private BufferedReader br;
         private Socket client;
+        private String clientName;
         
         public ClientHandler(Socket socket) {
             this.client = socket;
+            this.clientName = client.getInetAddress().getHostAddress() + "/" + 
+                    client.getInetAddress().getHostName();
         }
         
         private void setupStreams() throws Exception {
