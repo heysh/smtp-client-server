@@ -1,2 +1,2 @@
-second
+second.sender@example.com
 this is the second client
