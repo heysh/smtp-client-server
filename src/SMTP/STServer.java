@@ -219,7 +219,7 @@ public class STServer {
     public static void main(String[] args) throws Exception {
         // set the server IP and port number
         String serverIP = "192.168.56.1";
-        int port = 7777;
+        int port = 25;
 
         // if arguments have been provided, reassign the server IP and port number
         if (args.length > 0) {
