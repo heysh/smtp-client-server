@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 /**
  * Class that acts as an SMTP client; connecting to a server and sending emails.
- * @author Harshil Surendralal bf000259
+ * @author Harshil Surendralal
  *
  */
 public class Client {

@@ -13,7 +13,7 @@ import java.net.Socket;
 
 /**
  * Class that acts as an SMTP server; allowing clients to connect and send emails.
- * @author Harshil Surendralal bf000259
+ * @author Harshil Surendralal
  */
 public class STServer {
     private ServerSocket server;

@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Class that acts as an SMTP server; allowing clients to connect and send emails.
- * @author Harshil Surendralal bf000259
+ * @author Harshil Surendralal
  *
  */
 public class Server {
@@ -116,7 +116,7 @@ public class Server {
 
     /**
      * Class that handles the requests of each client.
-     * @author Harshil Surendralal bf000259
+     * @author Harshil Surendralal
      *
      */
     private static class ClientHandler implements Runnable {
