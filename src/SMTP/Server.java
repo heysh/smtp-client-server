@@ -22,7 +22,7 @@ public class Server {
     private static ServerSocket server;
     private Socket client;
     private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    
+
     /**
      * Create an object of type Server that creates a server socket at an IP address, with a given port.
      * @param ipAddress The IP address the server will be bound to.
@@ -36,16 +36,16 @@ public class Server {
             server = new ServerSocket(0, 1, InetAddress.getLocalHost());
         }
     }
-    
+
     /**
-     * Print a message to the console prefaced with a timestamp. 
+     * Print a message to the console prefaced with a timestamp.
      * @param message The message that is to be printed.
      */
     private static void print(String message) {
         LocalDateTime now = LocalDateTime.now();
         System.out.println("\r\n[" + dtf.format(now) + "] " + message);
     }
-    
+
     /**
      * Wait until a client wishes to connect to the server, and accept the connection.
      * @throws Exception
@@ -56,7 +56,7 @@ public class Server {
         print("Connected to " + client.getInetAddress().getHostAddress() + "/" +
                 client.getInetAddress().getHostName());
     }
-    
+
     /**
      * Primary method used to accept and handle clients.
      * @throws Exception
@@ -69,10 +69,10 @@ public class Server {
                 new Thread(clientSocket).start();
             } catch (EOFException e) {
                 print("Server closed the connection");
-            }           
+            }
         }
     }
-    
+
     /**
      * Get the IP address the server is be bound to.
      * @return The IP address.
@@ -80,7 +80,7 @@ public class Server {
     private InetAddress getSocketAddress() {
         return server.getInetAddress();
     }
-    
+
     /**
      * Get the port on which the server socket is bound.
      * @return The port.
@@ -88,7 +88,7 @@ public class Server {
     private int getPort() {
         return server.getLocalPort();
     }
-    
+
     /**
      * Main entry point to the program.
      * @param args The command line arguments passed to the program.
@@ -98,22 +98,22 @@ public class Server {
      // set the server IP and port number
         String serverIP = "192.168.56.1";
         int port = 7777;
-        
+
         // if arguments have been provided, reassign the server IP and port number
         if (args.length > 0) {
             serverIP = args[0];
             port = Integer.parseInt(args[1]);
         }
-        
+
         // create an object of type Server
         Server server = new Server(serverIP, port);
         print("Running server: " +
                 "Host=" + server.getSocketAddress().getHostAddress() +
                 " Port=" + server.getPort());
-        
+
         server.listen();
     }
-    
+
     /**
      * Class that handles the requests of each client.
      * @author Harshil Surendralal bf000259
@@ -125,17 +125,17 @@ public class Server {
         private BufferedReader br;
         private Socket client;
         private String clientName;
-        
+
         /**
          * Create an object of type ClientHandler that holds the client's socket.
          * @param socket The socket of the client.
          */
         public ClientHandler(Socket socket) {
             this.client = socket;
-            this.clientName = client.getInetAddress().getHostAddress() + "/" + 
+            this.clientName = client.getInetAddress().getHostAddress() + "/" +
                     client.getInetAddress().getHostName();
         }
-        
+
         /**
          * Setup the input buffer, and the input and output streams that will be used to send and receive messages, to and from the client.
          * @throws Exception
@@ -146,7 +146,7 @@ public class Server {
             br = new BufferedReader(input);
             print("Streams are setup");
         }
-        
+
         /**
          * Transmit a message to the client using their output stream.
          * @param message The message that will be transmitted.
@@ -155,15 +155,15 @@ public class Server {
         private void sendMessage(String message) throws Exception {
             output.println(message);
         }
-        
+
         /**
-         * Transmit the initial message to the client. 
+         * Transmit the initial message to the client.
          * @throws Exception
          */
         private void initiateCommunication() throws Exception {
             sendMessage("220 " + server.getInetAddress().getHostName());
         }
-        
+
         /**
          * Read each line of the email that is being transmitted from the client.
          * @return The email that has been transmitted from the client.
@@ -172,15 +172,15 @@ public class Server {
         private String handleEmail() throws Exception {
             String email = "";
             String line;
-            
+
             // until the client sends a ".", concatenate the line to email, followed by a newline character
             while (!(line = br.readLine()).equals(".")) {
                 email = email + line + "\n";
             }
-            
+
             return email;
         }
-        
+
         /**
          * Save the email that has been transmitted by the client to a file, named after the intended recipient of the email.
          * @param sender The sender of the email.
@@ -192,7 +192,7 @@ public class Server {
                 // create a FileWriter object, and create a BufferedWriter object from it
                 FileWriter fw = new FileWriter(recipient + ".txt");
                 BufferedWriter bw = new BufferedWriter(fw);
-                
+
                 // write the email to the file and close the BufferedWriter
                 bw.write(sender + "\n" + email);
                 bw.close();
@@ -201,7 +201,7 @@ public class Server {
                 print("Could not save the email");
             }
         }
-        
+
         /**
          * Primary method used to transmit and receive messages to and from the client.
          * @throws Exception
@@ -209,32 +209,32 @@ public class Server {
         private void exchangeMessages() throws Exception {
             String line, sender = "", recipient = "", email = "";
             String[] lineSplitted;
-            
+
             // until the message that is received is "QUIT", keep reading messages from the client
             while (!(line = br.readLine()).equals("QUIT")) {
                 print(clientName + ": " + line);
                 lineSplitted = line.split(" "); // split the line by spaces so the message can be identified easily
-                
+
                 // if the first word is "HELLO"
                 if (lineSplitted[0].equals("HELLO") && lineSplitted.length == 2) {
                     // respond by greeting the client
                     sendMessage("250 Hello " + lineSplitted[1] + ", pleased to meet you");
                 }
-                
+
                 // if the line starts with "MAIL FROM:"
                 if (line.startsWith("MAIL FROM:")) {
                     // save the sender's email address and respond with an OK message
                     sender = lineSplitted[2].substring(1, lineSplitted[2].length() - 1);
                     sendMessage("250 ok");
                 }
-                
+
                 // if the line starts with "RCPT TO:"
                 if (line.startsWith("RCPT TO: ")) {
                     // save the recipient's email address and respond with an OK message
                     recipient = lineSplitted[2].substring(1, lineSplitted[2].length() - 1);
                     sendMessage("250 ok");
                 }
-                
+
                 // if the message is "DATA"
                 if (line.equals("DATA")) {
                     sendMessage("354 End data with <CR><LF>.<CR><LF>");
@@ -244,7 +244,7 @@ public class Server {
                 }
             }
         }
-        
+
         /**
          * Transmit the final message to the client.
          * @throws Exception
@@ -252,7 +252,7 @@ public class Server {
         private void farewell() throws Exception {
             sendMessage("221 " + server.getInetAddress().getHostName() + " closing connection");
         }
-        
+
         /**
          * Close the socket, input buffer, and the input and output streams that were used to send and receive messages, to and from the client.
          * @throws Exception
@@ -264,7 +264,7 @@ public class Server {
             br.close();
             client.close();
         }
-        
+
         /**
          * Primary method used to setup communication and close connections to clients.
          */
