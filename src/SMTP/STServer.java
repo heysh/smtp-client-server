@@ -11,6 +11,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+// Deprecated: This is a single-threaded SMTP server class that has been replaced by a multithreaded one with the development of Server.java
+
 /**
  * Class that acts as an SMTP server; allowing clients to connect and send emails.
  * @author Harshil Surendralal
