@@ -38,7 +38,7 @@ Once connected to an SMTP server, there are three stages in which the client wil
 
 2. `RCPT TO` – Specify the recipient's email address.
 
-3. `End data with <CR><LF>.<CR><LF>` – Write the content of the email. A new line is created by pressing `Enter`, and the email is sent by pressing `.`.
+3. `End data with <CR><LF>.<CR><LF>` – Write the content of the email. A new line is created by pressing `Enter`, and the email is concluded by transmitting a single `.` in the last line.
 
 ## Demo
 
