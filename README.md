@@ -24,7 +24,7 @@ Using TCP, the server can establish a connection to multiple clients simultaneou
 
 ### Client
 
-Once the SMTP server is set up, clients can connect to it using the executable `JAR` file.
+Once the SMTP server is set up, multiple clients can connect to it simultaneously using the executable `JAR` file.
 
 ```console
 java -cp SMTP.jar SMTP.Client [ip address] [port number]
@@ -32,11 +32,10 @@ java -cp SMTP.jar SMTP.Client [ip address] [port number]
 
 Again, if the optional parameters are missing, `"192.168.56.1"` and `25` will be used respectively.
 
-Multiple clients are able to connect to a single SMTP server and send an email by:
+Once connected to an SMTP server, there are three stages in which the client will have to provide an input:
 
-1. specifying their (sender) email address,
+1. `MAIL FROM` – Specify their (sender) email address.
 
-2. specifying the recipient's email address, and
+2. `RCPT TO` – Specify the recipient's email address.
 
-3. writing the content of the email.
-
+3. `End data with <CR><LF>.<CR><LF>` – Write the content of the email. A new line is created by pressing `Enter`, and the email is sent by pressing `.`.
